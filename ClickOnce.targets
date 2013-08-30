@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="PublishClickOnceClickOnce" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+ 
+  <Import Condition="'$(CSPROJ)' != ''" Project="$(CSPROJ)"/>
+  
+  <!-- ClickOnce Target capable of building Side by Side click once Deployments. -->
+  <!-- This can be appended to most .csproj files. -->
+  <Target Name="ClickOnce" DependsOnTargets="">
+    <!-- project settings -->
+    <PropertyGroup>
+      <Major Condition=" '$(MAJOR)' == '' ">1</Major>
+      <Minor Condition=" '$(MINOR)' == '' ">0</Minor>
+      <Revision Condition=" '$(Revision)' == '' ">0</Revision>
+      <Build Condition=" '$(BUILD)' == '' ">0</Build>
+      <ClickOnceVersion Condition="'$(ClickOnceVersion)' == ''">$(Major).$(Minor).$(Build).$(Revision)</ClickOnceVersion>
+      
+      <!-- This is the ClickOnce suffix for an output. In most cases this is the
+  		only property which needs changing for side by side deployment. -->
+      <ClickOnceIdentitySuffix Condition=" '$(ClickOnceIdentitySuffix)' == '' ">DEV</ClickOnceIdentitySuffix>
+
+      <!-- Fingerprint of the Certificate in the Cert store which should be 
+  		used to sign the Assembly. -->
+      <CertHash Condition=" '$(CertHash)' == '' "></CertHash>
+      
+      <!-- Specify the path to the binaries you want packaged for click 
+  		once Deployment -->
+      <ClickOnceBinaryPath Condition=" '$(ClickOnceBinaryPath)' == '' ">$(OutputPath)</ClickOnceBinaryPath>
+      
+      <!-- Specify the Assembly Name, this will be interpreted as Assembly 
+  		Identity and must be different for side by side deployment.  -->
+      <ClickOnceAssemblyName Condition=" '$(ClickOnceAssemblyName)' == '' ">$(AssemblyName) $(ClickOnceIdentitySuffix)</ClickOnceAssemblyName>
+      
+      <!-- Specify the Product Name to be used on the Start menu. -->
+      <ClickOnceProductName Condition=" '$(ClickOnceProductName)' == '' ">$(ProductName) $(ClickOnceIdentitySuffix)</ClickOnceProductName>
+      
+      <!-- Specify the path where the product of the click once deployment 
+  		will be saved at the end of the build process.	-->
+      <ClickOncePublishUrl Condition=" '$(ClickOncePublishUrl)' == '' ">$(PublishUrl)/</ClickOncePublishUrl>
+      
+      <!-- Specify the URL from which the Application will be installed. -->
+      <ClickOnceInstallUrl Condition=" '$(ClickOnceInstallUrl)' == '' ">$(InstallUrl)</ClickOnceInstallUrl>
+      
+      <!-- Path to this specific version of the application within 
+  		the Deployment Path. -->
+      <ClickOnceApplicationPath Condition=" '$(ClickOnceApplicationPath)' == '' ">$(AssemblyName)_$(ClickOnceVersion)\</ClickOnceApplicationPath>
+
+	    <MagePath Condition=" '$(MagePath)' == '' ">C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\Bin\NETFX 4.0 Tools\mage.exe</MagePath>
+    </PropertyGroup>
+    
+    <Message Text="CSPROJ=$(CSPROJ)" />
+    <Message Text="Configuration=$(Configuration), Platform: $(Platform)" />
+    <Message Text="ClickOnceAssemblyName: $(ClickOnceAssemblyName)" />
+    <Message Text="ClickOnceProductName:  $(ClickOnceProductName)" />
+    <Message Text="ClickOnceBinaryPath: $(ClickOnceBinaryPath)" />
+    <Message Text="ClickOncePublishUrl: $(ClickOncePublishUrl)" />
+    <Message Text="ClickOnceInstallUrl: $(ClickOnceInstallUrl)" />
+    <Message Text="ClickOnceApplicationPath: $(ClickOnceApplicationPath)" />
+    <Message Text="ClickOnceVersion: $(ClickOnceVersion)" />
+    <Message Text="TargetFrameworkVersion: $(TargetFrameworkVersion)" />
+    
+    <Message Text="Creating Deployment and Application Path Directories. " />
+    <Message Text="$(ClickOncePublishUrl)$(ClickOnceApplicationPath)" />
+    <MakeDir Directories="$(ClickOncePublishUrl)$(ClickOnceApplicationPath)" Condition="!Exists('$(ClickOncePublishUrl)$(ClickOnceApplicationPath)')" />
+    <Message Text="Copying Application Files to deployment location." />
+    <ItemGroup>
+      <!-- Get binary files, excluding any stock VS2010 driven publish process. -->
+      <ClickOnceApplicationFiles Include="$(ClickOnceBinaryPath)\**\*.*" Exclude="$(ClickOnceBinaryPath)app.publish\**;$(ClickOnceBinaryPath)*.vshost.*;$(ClickOnceBinaryPath)*.application;$(ClickOnceBinaryPath)*.pdb" />
+    </ItemGroup>
+    <Copy SourceFiles="@(ClickOnceApplicationFiles)" DestinationFiles="@(ClickOnceApplicationFiles->'$(ClickOncePublishUrl)$(ClickOnceApplicationPath)\%(RecursiveDir)%(Filename)%(Extension)')" />
+    
+    <Message Text="Generating Application Manifest" />
+    <!-- Regenerate the application manifest using mage. There are a lot fo assumptions in the manifest generation in the VS targets files as of VS2008. -->
+    <Exec Command='"$(MagePath)" -New Application  -Processor msil -ToFile "$(ClickOncePublishUrl)$(ClickOnceApplicationPath)$(AssemblyName).exe.manifest" -name "$(ClickOnceAssemblyName)" -Version $(ClickOnceVersion) -FromDirectory "$(ClickOncePublishUrl)$(ClickOnceApplicationPath)\" -ch "$(CertHash)"' />
+ 
+    <!-- the application manifest needs to be signed before handing off to GenerateDeploymentManifest -->
+    <SignFile CertificateThumbprint="$(CertHash)" SigningTarget="$(ClickOncePublishUrl)$(ClickOnceApplicationPath)$(AssemblyName).exe.manifest" /> 
+    
+    <Message Text="Generating Deployment Manifest" />
+        
+    <ItemGroup>
+      <DeploymentEntryPoint />
+    </ItemGroup>
+
+    <CreateItem Include="$(ClickOncePublishUrl)$(ClickOnceApplicationPath)$(AssemblyName).exe.manifest" AdditionalMetadata="TargetPath=$(ClickOnceApplicationPath)$(AssemblyName).exe.manifest">
+      <Output TaskParameter="Include" ItemName="DeploymentEntryPoint" />
+    </CreateItem>
+    <Message Text="Deployment Entry Point: @(DeploymentEntryPoint)" />
+    <GenerateDeploymentManifest 
+      AssemblyName="$(ClickOnceAssemblyName)" 
+      AssemblyVersion="$(ClickOnceVersion)" 
+      DeploymentUrl="$(ClickOnceInstallUrl)$(AssemblyName)$(ClickOnceIdentitySuffix).application" 
+      EntryPoint="@(DeploymentEntryPoint)" 
+      Install="true" 
+      OutputManifest="$(ClickOncePublishUrl)$(AssemblyName)$(ClickOnceIdentitySuffix).application" 
+      Product="$(AssemblyName) $(ClickOnceIdentitySuffix)" 
+      Publisher="$(Publisher)" 
+      SupportUrl="$(SupportUrl)" 
+      UpdateEnabled="true" 
+      UpdateInterval="3" 
+      UpdateMode="Foreground" 
+      UpdateUnit="weeks"
+      TargetFrameworkVersion="v4.0"
+      TargetFrameworkMoniker=".NETFramework,Version=v4.0"
+    >  
+    </GenerateDeploymentManifest>
+    
+    <!-- sign the click one application file -->
+    <SignFile CertificateThumbprint="$(CertHash)" SigningTarget="$(ClickOncePublishUrl)$(AssemblyName)$(ClickOnceIdentitySuffix).application" />
+  </Target>
+</Project>
