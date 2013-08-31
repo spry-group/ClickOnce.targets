@@ -1,4 +1,6 @@
-<img style="float:left;" src="http://spry-group.com/images/Spry-Group-Logo-88px-web.png"> ClickOnce.targets
+
+
+ClickOnce.targets
 =======================
 
 ClickOnce.targets is an MSBUILD file that can be used in your continuous deployment pipeline to enable le side by side click once deployment to Development (DEV), Quality Assurance (QA), and Production (PROD) for continuous integration servers.
@@ -46,3 +48,9 @@ Optional:
  1. $(ClickOnceProductName) -  Specify the Product Name to be used on the Start menu. Default: $(ProductName) $(ClickOnceIdentitySuffix)
  1. $(ClickOnceApplicationPath) - $(AssemblyName)_$(ClickOnceVersion)\
  1. $(MagePath) - Path to mage binary., Default: C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\Bin\NETFX 4.0 Tools\mage.exe
+
+
+<a href="http://spry-group.com"><h6>Work supported by The Spry Group</h6></a>
+ 
+
+
