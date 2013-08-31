@@ -1,5 +1,4 @@
 
-
 ClickOnce.targets
 =======================
 
@@ -50,7 +49,7 @@ Optional:
  1. $(MagePath) - Path to mage binary., Default: C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\Bin\NETFX 4.0 Tools\mage.exe
 
 
-<a href="http://spry-group.com"><h6>Work supported by The Spry Group</h6></a>
+<a href="http://spry-group.com">Work supported by The Spry Group</a>
  
 
 
