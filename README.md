@@ -1,4 +1,4 @@
-ClickOnce.targets
+<img style="float:left;" src="http://spry-group.com/images/Spry-Group-Logo-88px-web.png"> ClickOnce.targets
 =======================
 
 ClickOnce.targets is an MSBUILD file that can be used in your continuous deployment pipeline to enable le side by side click once deployment to Development (DEV), Quality Assurance (QA), and Production (PROD) for continuous integration servers.
