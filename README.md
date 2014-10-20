@@ -42,7 +42,7 @@ Optional:
  1. $(BUILD) -  Revision Version number, defaulted from project.
  1. $(Revision) - Revision Version number, defaulted from project. Recommendation: use .1 = DEV, .2 = QA, .3 = PROD so you can distinguish multiple publishings of the same build.
  1. $(ClickOnceVersion) - Override Assembly Version., Default: $(Major).$(Minor).$(Build).$(Revision)
- 1. $(ClickOnceeBinaryPath) - Specify the path to the binaries you want packaged for click once Deployment. , Default: $(OutputPath)
+ 1. $(ClickOnceBinaryPath) - Specify the path to the binaries you want packaged for click once Deployment. , Default: $(OutputPath)
  1. $(ClickOnceAssemblyName) - Specify the Assembly Name, this will be interpreted as Assembly Identity and must be different for side by side deployment. Default: $(AssemblyName) $(ClickOnceIdentitySuffix)
  1. $(ClickOnceProductName) -  Specify the Product Name to be used on the Start menu. Default: $(ProductName) $(ClickOnceIdentitySuffix)
  1. $(ClickOnceApplicationPath) - $(AssemblyName)_$(ClickOnceVersion)\
